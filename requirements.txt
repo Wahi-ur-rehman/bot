@@ -3,4 +3,5 @@ pandas
 numpy
 ta
 scikit-learn
+lightgbm
 python-docx
