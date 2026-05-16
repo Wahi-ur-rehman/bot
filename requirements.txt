@@ -5,3 +5,6 @@ ta
 scikit-learn
 lightgbm
 python-docx
+google-generativeai
+groq
+requests

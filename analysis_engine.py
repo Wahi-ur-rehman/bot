@@ -348,6 +348,9 @@ class MLSignal:
             return False
 
         df = compute_indicators(df.copy())
+        # Ensure data is sorted chronologically to prevent leakage in non-shuffled split
+        df = df.sort_index()
+        
         available = [f for f in self.FEATURES if f in df.columns]
         if len(available) < 10:
             print(f"[ML] Too few features available ({len(available)}).")
@@ -362,6 +365,7 @@ class MLSignal:
         if len(X) < 60:
             return False
 
+        # Non-shuffled split on time-sorted data ensures no future data leaks into training
         X_tr, X_te, y_tr, y_te = train_test_split(
             X, y, test_size=0.2, shuffle=False
         )

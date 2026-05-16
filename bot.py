@@ -44,6 +44,7 @@ from trade_executor import (
     monitor_positions, manage_open_trades,
 )
 from logger import log_signal, log_trade, log_info, log_error, print_session_summary
+from ai_judge import AIJudge
 import MetaTrader5 as mt5
 import numpy as np
 
@@ -58,6 +59,11 @@ STREAK_REQUIRED  = 2           # 2 consecutive agreeing signals
 MAX_DAILY_LOSS   = 0.03        # 3% daily drawdown circuit breaker
 MAX_SPREAD_MULT  = 1.5         # skip if spread > 1.5× rolling average
 MIN_ADX          = 20          # skip ranging markets
+
+# AI Integration
+AI_CONFIRMATION  = True        # Set to True to enable AI confirmation layer
+AI_PROVIDER      = "gemini"    # "gemini", "groq", or "openrouter"
+AI_API_KEY       = ""          # ⬅️ INSERT YOUR API KEY HERE
 
 # Trading sessions (UTC) — only enter during high liquidity
 TRADING_SESSIONS = {
@@ -204,11 +210,21 @@ def run():
     else:
         log_error("No data from MT5. Check symbols and connection.")
 
-    # ─── Session stats ─────────────────────────────────────────────
-    session_tp  = 0
-    session_sl  = 0
-    session_pnl = 0.0
-    cycle       = 0
+    # ─── Initialize AI Judge ───────────────────────────────────────
+    ai_judge = None
+    if AI_CONFIRMATION:
+        try:
+            ai_judge = AIJudge(provider=AI_PROVIDER, api_key=AI_API_KEY)
+            log_info(f"✅ AI Judge initialized ({AI_PROVIDER})")
+        except Exception as e:
+            log_error(f"Failed to initialize AI Judge: {e}")
+
+    # Session stats
+    session_tp     = 0
+    session_sl     = 0
+    session_pnl    = 0.0
+    cycle          = 0
+    news_sentiment = {}
 
     try:
         while True:
@@ -269,6 +285,12 @@ def run():
             # ── 5. Print Kelly tracker stats ─────────────────────────
             if tracker.trade_count > 0 and cycle % 10 == 0:
                 tracker.print_stats()
+
+            # ── 5b. Periodic News Sentiment check ────────────────────
+            if ai_judge and cycle % 60 == 0: # Every ~30 mins
+                currencies = list(set([s[:3] for s in market_data.keys()] + [s[3:6] for s in market_data.keys() if len(s)==6]))
+                from ai_judge import get_news_sentiment
+                news_sentiment = get_news_sentiment(ai_judge, currencies)
 
             # ── 6. Analyse each symbol ───────────────────────────────
             trade_candidates   = []
@@ -338,6 +360,14 @@ def run():
                 # ── Calculate SL/TP with regime awareness ──────────
                 sl_tp = calculate_sl_tp(symbol, dec, df, regime=regime)
 
+                # ── AI Confirmation Layer ──────────────────────────
+                if ai_judge:
+                    from ai_judge import AI_MIN_AGREE
+                    verdict = ai_judge.confirm_signal(symbol, signal, df)
+                    if AI_MIN_AGREE and not verdict["confirmed"]:
+                        log_info(f"  🤖 {symbol}: AI vetoed trade — {verdict['reason']}")
+                        continue
+
                 trade_candidates.append({
                     "symbol"    : symbol,
                     "decision"  : dec,
@@ -347,6 +377,7 @@ def run():
                     "entry"     : sl_tp["entry"],
                     "confidence": conf,
                     "regime"    : regime,
+                    "ai_reason" : verdict["reason"] if ai_judge else None
                 })
                 symbols_this_cycle.add(symbol)
 
