@@ -53,7 +53,5 @@ graph TD
 > **PROPRIETARY SOFTWARE — ALL RIGHTS RESERVED**
 > This code is private property. Unauthorized copying, modification, or redistribution is strictly prohibited. See the [LICENSE](LICENSE) file for full legal terms.
 
-**Security Check Clean**: No API keys or credentials are hardcoded in this repository. All connections use local MT5 instance auth.
-
 ---
 **Disclaimer**: *Trading forex and CFDs involves significant risk. This software is provided for educational purposes only. Past performance does not guarantee future results.*
