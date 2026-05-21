@@ -46,24 +46,7 @@ graph TD
     I --> J[Live MT5 Order]
 ```
 
----
 
-## 📦 Installation & Setup
-
-1.  **Clone & Prepare**:
-    ```bash
-    git clone https://github.com/Wahi-ur-rehman/bot.git
-    cd bot
-    pip install -r requirements.txt
-    ```
-2.  **Configure API**:
-    Edit `bot.py` and set your `AI_API_KEY`.
-3.  **Launch**:
-    ```bash
-    python bot.py
-    ```
-
----
 
 ## 🔒 License & Security
 > [!CAUTION]
