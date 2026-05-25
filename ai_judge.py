@@ -16,7 +16,8 @@ from logger import log_info, log_error
 
 AI_PROVIDER   = "gemini"        # "gemini" | "groq" | "openrouter"
 AI_MIN_AGREE  = True            # if True, only trade when AI confirms
-AI_CACHE_SECS = 25              # don't re-query same symbol within 25s
+AI_CACHE_SECS = 300             # don't re-query same symbol within 5 mins
+AI_COOLDOWN   = 600             # 10 min cooldown if quota is hit
 MAX_RETRIES   = 2               # retry on API failure
 
 # ══════════════════════════════════════════════════════════════════
@@ -156,7 +157,7 @@ class AIJudge:
     """
 
     def __init__(self, provider: str = AI_PROVIDER, api_key: str = ""):
-        self._cache: dict[str, tuple[float, dict]] = {}  # symbol → (timestamp, verdict)
+        self._cooldown_until = 0
 
         if provider == "gemini":
             self._provider = _GeminiProvider(api_key)
@@ -177,6 +178,11 @@ class AIJudge:
         """
         Ask the AI whether to confirm or veto the given signal.
         """
+        # ── Cooldown check ───────────────────────────────────────
+        if time.time() < self._cooldown_until:
+            return {"confirmed": True, "confidence": 50,
+                    "reason": "AI in cooldown (quota) — fallback confirm", "risk_note": None}
+
         # ── Cache check ──────────────────────────────────────────
         if not force_refresh and symbol in self._cache:
             ts, cached = self._cache[symbol]
@@ -207,6 +213,12 @@ class AIJudge:
                 return verdict
 
             except Exception as e:
+                # Detect quota error
+                if "429" in str(e) or "Quota exceeded" in str(e):
+                    log_error(f"[AI] Quota hit for {symbol}. Entering cooldown for {AI_COOLDOWN}s.")
+                    self._cooldown_until = time.time() + AI_COOLDOWN
+                    break # Exit retry loop early
+
                 log_error(f"[AI] Attempt {attempt+1} failed for {symbol}: {e}")
                 if attempt < MAX_RETRIES - 1:
                     time.sleep(2)

@@ -14,7 +14,7 @@
 ### 🧠 Triple-Confirm Logic
 Every trade must pass through a rigorous 3-layer filter:
 1.  **Technical Shell**: RSI, MACD, and EMA Trend alignment + ADX Momentum Gate.
-2.  **Machine Learning**: LightGBM model trained on hundreds of thousands of data points across 20+ symbols.
+2.  **Machine Learning**: LightGBM model trained on hundreds of thousands of data points across 10+ Forex symbols.
 3.  **AI Judge**: Real-time signal validation using **Gemini-2.0-Flash** or **Groq (Llama-3.3)**.
 
 ### 🛡️ Institutional Risk Management

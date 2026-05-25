@@ -197,8 +197,18 @@ def calculate_lot_size(
 
     # ─── Convert risk amount to lots ─────────────────────────────────
     raw_lot = risk_amount / (sl_pips * pip_val_1_lot)
-    lot     = max(MIN_LOT, min(MAX_LOT, raw_lot))
-    return round(round(lot / step) * step, 2)
+    
+    # Respect symbol's specific volume limits
+    min_vol = info.volume_min if info else MIN_LOT
+    max_vol = info.volume_max if info else MAX_LOT
+    
+    lot = max(min_vol, min(max_vol, raw_lot))
+    
+    # Align to volume step with correct precision
+    if step > 0:
+        lot = round(round(lot / step) * step, 8)
+        
+    return float(lot)
 
 
 # ══════════════════════════════════════════════════════════════════════

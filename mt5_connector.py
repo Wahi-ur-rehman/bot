@@ -27,10 +27,6 @@ SYMBOLS = [
     "AUDUSD", "USDCAD", "NZDUSD",
     # Crosses
     "EURJPY", "GBPJPY", "EURGBP",
-    # Indices
-    "US30", "NAS100", "SPX500", "GER40", "UK100",
-    # Stocks
-    "AAPL", "TSLA", "NVDA", "MSFT", "AMZN",
 ]
 
 DEFAULT_TIMEFRAME = mt5.TIMEFRAME_M5   # M5 for real scalping (was M15)

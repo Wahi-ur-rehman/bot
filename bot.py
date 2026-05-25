@@ -63,7 +63,7 @@ MIN_ADX          = 20          # skip ranging markets
 # AI Integration
 AI_CONFIRMATION  = True        # Set to True to enable AI confirmation layer
 AI_PROVIDER      = "gemini"    # "gemini", "groq", or "openrouter"
-AI_API_KEY       = ""          # ⬅️ INSERT YOUR API KEY HERE
+AI_API_KEY       = "AIzaSyCAexGW6Baqxvapz1XVYCmm1F2pINGsdJM"          # ⬅️ INSERT YOUR API KEY HERE
 
 # Trading sessions (UTC) — only enter during high liquidity
 TRADING_SESSIONS = {
