@@ -157,6 +157,7 @@ class AIJudge:
     """
 
     def __init__(self, provider: str = AI_PROVIDER, api_key: str = ""):
+        self._cache: dict[str, tuple[float, dict]] = {}  # symbol → (timestamp, verdict)
         self._cooldown_until = 0
 
         if provider == "gemini":
