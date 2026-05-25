@@ -28,7 +28,7 @@ ATR_PERIOD       = 14
 MAX_OPEN_TRADES  = 6        # reduced from 8 — tighter exposure at M5
 MIN_LOT          = 0.01
 MAX_LOT          = 0.5
-MIN_SL_PIPS      = 5
+MIN_SL_PIPS      = 10
 KELLY_FRACTION   = 0.25     # use 25% of full Kelly — much safer
 MIN_KELLY_TRADES = 10       # minimum trades before Kelly activates
 
@@ -198,11 +198,14 @@ def calculate_lot_size(
     # ─── Convert risk amount to lots ─────────────────────────────────
     raw_lot = risk_amount / (sl_pips * pip_val_1_lot)
     
-    # Respect symbol's specific volume limits
+    # Respect BOTH the broker limits and the bot's internal MAX_LOT safety cap
     min_vol = info.volume_min if info else MIN_LOT
-    max_vol = info.volume_max if info else MAX_LOT
+    broker_max = info.volume_max if info else MAX_LOT
     
-    lot = max(min_vol, min(max_vol, raw_lot))
+    # The final cap is the smaller of the two maxima
+    safe_max = min(broker_max, MAX_LOT)
+    
+    lot = max(min_vol, min(safe_max, raw_lot))
     
     # Align to volume step with correct precision
     if step > 0:
