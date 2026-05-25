@@ -32,12 +32,12 @@ MIN_SL_PIPS      = 10
 KELLY_FRACTION   = 0.25     # use 25% of full Kelly — much safer
 MIN_KELLY_TRADES = 10       # minimum trades before Kelly activates
 
-# SL / TP multipliers per regime
+# SL / TP multipliers per regime optimized for Forex
 REGIME_PARAMS = {
-    "TRENDING":  {"sl_mult": 1.5, "tp_mult": 4.0},
-    "RANGING":   {"sl_mult": 1.2, "tp_mult": 1.8},
-    "VOLATILE":  {"sl_mult": 2.5, "tp_mult": 3.5},
-    "NEUTRAL":   {"sl_mult": 1.5, "tp_mult": 2.0},
+    "TRENDING":  {"sl_mult": 1.2, "tp_mult": 2.5},  # More realistic targets
+    "RANGING":   {"sl_mult": 1.0, "tp_mult": 1.5},  # Tighter for ranges
+    "VOLATILE":  {"sl_mult": 2.0, "tp_mult": 3.0},  # Room to breathe
+    "NEUTRAL":   {"sl_mult": 1.2, "tp_mult": 2.0},  
 }
 
 
